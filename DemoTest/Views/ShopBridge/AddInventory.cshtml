@@ -1,0 +1,525 @@
+﻿@model DemoTest.Models.InventoryDetailsModel
+@{
+    ViewBag.Title = "AddInventory";
+}
+
+<style>
+
+    .editor-field textarea {
+        width: 400px;
+        height: 100px;
+    }
+
+    .blur {
+        border: 1px solid red;
+    }
+
+    #grdOtherAssistancedetails > tbody > tr > td {
+        border-top: 0px solid #ddd;
+    }
+
+    .th-gradient {
+        background-color: #0f5579;
+        color: white !important;
+    }
+
+    .modal-header {
+        padding: 5px !important;
+    }
+
+    .clasbold {
+        font-weight: bold !important;
+    }
+</style>
+<script src="~/Scripts/jquery-3.4.1.js"></script>
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script src="~/Scripts/jquery-2.1.4.min.js"></script>
+@using (Html.BeginForm())
+{
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <form>
+                    <div class="row">
+                        <br />
+                        <div class="form-group  col-md-3">
+                            <label>Product Name :<span style="color:red;">*</span> </label>
+                            <input type="text" class="form-control" id="txtName" />
+
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Description: <span style="color:red;">*</span></label>
+                            <input type="text" class="form-control" id="txtDescription" />
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Quantity: <span style="color:red;">*</span></label>
+                            <input type="text" class="form-control" id="txtQuantity" onchange="Quantity();" />
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Price: <span style="color:red;">*</span></label>
+                            <input type="text" class="form-control" id="txtPrice" onchange="Quantity();" />
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Total Price: <span style="color:red;">*</span></label>
+                            <input type="text" class="form-control" id="txtTotalPrice" disabled="disabled" />
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Purchase Date: <span style="color:red;">*</span></label>
+                            <input type="text" class="form-control" id="txtPurchaseDate" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12 col--lg-12">
+                              
+
+
+                                <div class="table-responsive">
+                                    <table class="display table table-bordered " id="grdrequestdetails"> </table>
+                                </div>
+                                <div class='pagination-container' style="float:right; margin-top: -20px;">
+                                    <nav>
+                                        <ul class="pagination">
+                                            <li data-page="prev">
+                                                <span> Previous <span class="sr-only">(current)</span></span>
+                                            </li>
+                                            <!--	Here the JS Function Will Add the Rows -->
+                                            <li data-page="next" id="prev">
+                                                <span> Next <span class="sr-only">(current)</span></span>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+
+                                @*<div class="table-responsive">
+            <table class="table table-bordered" id="tblInventory">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Product Name</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total Price</th>
+                        <th>Purchase Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+            </table>
+        </div>*@
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="form-group SearchMember/SearchMember text-center">
+                            <input type="button" class="btn btn-primary" id="btnSubmit" value="Submit" onclick="Add_Details();" />
+                            <input type="button" class="btn btn-primary" id="btnClear" value="Clear" onclick="Clear();" />
+
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+
+    </div>
+
+    
+    <script src="~/Scripts/GridJS.js"></script>
+    <script src="~/Scripts/GridviewJs.js"></script>
+    <script>
+      
+
+        getPagination('#grdrequestdetails');
+        function getPagination(table) {
+            debugger;
+            var lastPage = 1;
+
+            lastPage = 1;
+            $('.pagination').find('li').slice(1, -1).remove();
+            var trnum = 0;
+            var maxRows = 10;
+            if (maxRows == 15000) {
+                $('.pagination').hide();
+            } else {
+                $('.pagination').show();
+            }
+            var totalRows = document.getElementById('grdrequestdetails').rows.length;
+            if (totalRows > 0) {
+                $('.pagination').show();
+            } else {
+                $('.pagination').hide();
+            }
+            $(table + ' tr:gt(0)').each(function () {
+                trnum++; // Start Counter
+                if (trnum > maxRows) {
+                    $(this).hide(); // fade it out
+                }
+                if (trnum <= maxRows) {
+                    $(this).show();
+                } // else fade in Important in case if it ..
+            }); //  was fade out to fade it in
+            if (totalRows > maxRows) {
+                // if tr total rows gt max rows option
+                var pagenum = Math.ceil(totalRows / maxRows); // ceil total(rows/maxrows) to get ..
+                //	numbers of pages
+                for (var i = 1; i <= pagenum;) {
+                    // for each page append pagination li
+                    $('.pagination #prev')
+                        .before(
+                            '<li data-page="' +
+                            i +
+                            '">\
+                                          <span>' +
+                            i++ +
+                            '<span class="sr-only">(current)</span></span>\
+                                        </li>'
+                        )
+                        .show();
+                } // end for i
+            } // end if row count > max rows
+            //  else {
+
+
+            // }
+            $('.pagination [data-page="1"]').addClass('active'); // add active class to the first li
+
+            $('.pagination li').on('click', function (evt) {
+                // on click each page
+                evt.stopImmediatePropagation();
+                evt.preventDefault();
+                var pageNum = $(this).attr('data-page'); // get it's number
+
+                var maxRows = 10; // get Max Rows from select option
+
+                if (pageNum == 'prev') {
+                    if (lastPage == 1) {
+                        return;
+                    }
+                    pageNum = --lastPage;
+                }
+                if (pageNum == 'next') {
+                    if (lastPage == $('.pagination li').length - 2) {
+                        return;
+                    }
+                    pageNum = ++lastPage;
+                }
+
+                lastPage = pageNum;
+                var trIndex = 0; // reset tr counter
+                $('.pagination li').removeClass('active'); // remove active class from all li
+                $('.pagination [data-page="' + lastPage + '"]').addClass('active'); // add active class to the clicked
+                // $(this).addClass('active');					// add active class to the clicked
+                limitPagging();
+                $(table + ' tr:gt(0)').each(function () {
+                    trIndex++;
+                    if (
+                        trIndex > maxRows * pageNum ||
+                        trIndex <= maxRows * pageNum - maxRows
+                    ) {
+                        $(this).hide();
+                    } else {
+                        $(this).show();
+                    }
+                });
+            });
+            limitPagging();
+        }
+
+        function limitPagging() {
+            if ($('.pagination li').length > 7) {
+                if ($('.pagination li.active').attr('data-page') <= 3) {
+                    $('.pagination li:gt(5)').hide();
+                    $('.pagination li:lt(5)').show();
+                    $('.pagination [data-page="next"]').show();
+                } if ($('.pagination li.active').attr('data-page') > 3) {
+                    $('.pagination li:gt(0)').hide();
+                    $('.pagination [data-page="next"]').show();
+                    for (let i = (parseInt($('.pagination li.active').attr('data-page')) - 2); i <= (parseInt($('.pagination li.active').attr('data-page')) + 2); i++) {
+                        $('.pagination [data-page="' + i + '"]').show();
+                    }
+                }
+            }
+        }
+
+        $(function () {
+            $('table tr:eq(0)').prepend('<th> ID </th>');
+            var id = 0;
+            $('table tr:gt(0)').each(function () {
+                id++;
+                $(this).prepend('<td>' + id + '</td>');
+            });
+        });
+
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            debugger;
+
+            BindList();
+        });
+    </script>
+    <script>
+        function Quantity() {
+            var Quantity = $('#txtQuantity').val();
+            var Price = $('#txtPrice').val();
+            $('#txtTotalPrice').val(Quantity * Price)
+        }
+
+        function BindList() {
+            $.ajax({
+                type: "GET",
+                url: "/ShopBridge/BindList",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                async: false,
+                success: function (data) {
+                    debugger;
+                    $("#grdrequestdetails").find("tr:gt(0)").remove();
+                    var tblInventory = $("#grdrequestdetails");
+                    if (data.length > 0) {
+                        $("#grdrequestdetails").show();
+                        PopulateTable1(data);
+                        // tableData = data.slice(0);
+                    }
+                    else {
+                        $("#CommonMsg").modal('show');
+                        $("#lblCommonMsg").html('No Data Found');
+                        $("#lblCommonMsg").css('color', '#008000');
+                        $("#grdrequestdetails").hide();
+                    }
+                },
+                error: {}
+            });
+        }
+        
+        function EditDetails(ID) {
+            $.ajax({
+                url: "/ShopBridge/EditInventory",
+                data: "{ID:" + ID + "}",
+                dataType: "json",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                async: false,
+                success: function (data) {
+                    $('#txtName').val(data.Name);
+                    $('#txtDescription').val(data.Description);
+                    $('#txtQuantity').val(data.Quantity);
+                    $('#txtPrice').val(data.Price);
+                    $('#txtTotalPrice').val(data.TotalPrice);
+                    $('#txtPurchaseDate').val(data.Date);
+
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        }
+
+        function DeleteDetails(ID) {
+            $.ajax({
+                url: "/ShopBridge/DeleteInventory",
+                data: "{ID:" + ID + "}",
+                dataType: "json",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                async: false,
+                success: function (data) {
+                    debugger;
+                    if (data = 200) {
+                        alert('Record Deleted Successfully');
+                        BindList();
+                        Clear();
+                    }
+                    else {
+                        $("#CommonMsg").modal('show');
+                        $("#lblCommonMsg").html(data.Data.ErrorMessage);
+                        $("#lblCommonMsg").css('color', '#008000');
+                        Clear();
+                    }
+
+
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        }
+
+        function Clear() {
+            $('#txtName').val('');
+            $('#txtDescription').val('');
+            $('#txtQuantity').val('');
+            $('#txtPrice').val('');
+            $('#txtTotalPrice').val('');
+            $('#txtPurchaseDate').val('');
+
+        }
+        function Add_Details() {
+            debugger;
+            if (Validation()) {
+                var objDetails = {};
+                objDetails.Name = $('#txtName').val();
+                objDetails.Description = $('#txtDescription').val();
+                objDetails.Quantity = $('#txtQuantity').val();
+                objDetails.Price = $('#txtPrice').val();
+                objDetails.TotalPrice = $('#txtTotalPrice').val();
+                objDetails.Date = $('#txtPurchaseDate').val();
+
+                //  if ($('#txtName').val() != "" || $('#txtDescription').val() != "" || ) {
+                $.ajax({
+                    url: "/ShopBridge/AddInventoryDetails",
+                    data: "{objDetails:" + JSON.stringify(objDetails) + "}",
+                    dataType: "json",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    async: false,
+                    success: function (data) {
+                        debugger;
+                        if (data = 200) {
+                            BindList();
+                            alert('Record Added Successfully');
+                            Clear();
+
+                        }
+                        else {
+                            $("#CommonMsg").modal('show');
+                            $("#lblCommonMsg").html(data.Data.ErrorMessage);
+                            $("#lblCommonMsg").css('color', '#008000');
+                            //  Clear();
+
+                        }
+
+
+                    },
+                    error: function (response) {
+                        alert(response.responseText);
+                    },
+                    failure: function (response) {
+                        alert(response.responseText);
+                    }
+                });
+
+                //}
+                //else {
+                //    alert('All Fields are mandatory..!');
+                //}
+            }
+
+        }
+        function PopulateTable1(data) {
+
+            $('#grdrequestdetails').hide();
+            $('#grdrequestdetails').empty();
+            var row;
+
+            row += "<tr>";
+            row += "<th class='th-gradient' style='text-align: left;'>Sr.No</th>"
+            row += "<th class='th-gradient' style='text-align: left;'>Name</th>"
+            row += "<th class='th-gradient' style='text-align: left;'>Description</th> "
+            row += "<th class='th-gradient' style='text-align: left;'>Price</th>"
+            row += "<th class='th-gradient' style='text-align: left;'>Quantity</th>"
+            row += "<th class='th-gradient' style='text-align: left;'>Total Price</th>"
+            row += "<th class='th-gradient' style='text-align: left;'>Pruchace Date</th>"
+            row += "<th class='th-gradient' style='text-align: left;'>Action</th>"
+            row += "</tr>";
+            $('#grdrequestdetails').append(row);
+            for (i = 0; i < data.length; i++) {
+                $("#grdrequestdetails").show();
+
+                row = '<tr id=' + data[i].InventoryID + '><td>' + (i + 1) + '</td>';
+                row += '<td>' + data[i].Name + '</td>';
+                row += '<td>' + data[i].Description + '</td>';
+                row += '<td>' + data[i].Price + '</td>';
+                row += '<td>' + data[i].Quantity + '</td>';
+                row += '<td>' + data[i].TotalPrice + '</td>';
+                row += '<td>' + data[i].Date + '</td>';
+                row += '<td>' + '<img src="/Images/edit.png" width="15px" id="btnedit" data-toggle="tooltip" title="Edit" onclick="EditDetails(' + data[i].InventoryID + ');" InventoryID=' + data[i].InventoryID + ' /><img src="/Images/delete.png" width="15px" data-toggle="tooltip" title="Delete" id="btndelete" onclick="DeleteDetails(' + data[i].InventoryID + ');" />' + '</td></tr>';
+                $('#grdrequestdetails').append(row);
+            }
+            getPagination(data);
+        }
+
+
+        function Checkall() {
+            debugger;
+            if ($("#divAuthor .selectall").is(':checked')) {
+                $("#divAuthor .case").each(function () {
+                    $('#divAuthor input[type=checkbox]').prop('checked', true);
+                });
+            }
+            else {
+                $("#divAuthor .case").each(function () {
+                    $('#divAuthor input[type=checkbox]').prop('checked', false);
+                });
+            }
+        }
+
+        function Validation() {
+            $(".blur").removeClass('blur');
+            var count = 0;
+            if ($("#txtDescription").val() == "") {
+
+                $("#txtDescription").addClass('blur');
+                count++;
+            }
+            if ($("#txtQuantity").val() == "") {
+
+                $("#txtQuantity").addClass('blur');
+                count++;
+            }
+            if ($("#txtPrice").val() == "") {
+
+                $("#txtPrice").addClass('blur');
+                count++;
+            }
+
+            if ($("#txtName").val() == "") {
+
+                $("#txtName").addClass('blur');
+                count++;
+            }
+            if ($("#txtPurchaseDate").val() == "") {
+
+                $("#txtPurchaseDate").addClass('blur');
+                count++;
+            }
+            if (count > 0) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+    </script>
+}
+
+
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#txtPurchaseDate').datepicker({
+                dateFormat: "dd/mm/yy",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "-60:+0"
+            });
+
+        });
+    </script>
+
+}
+

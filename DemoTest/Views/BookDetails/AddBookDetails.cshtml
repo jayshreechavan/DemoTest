@@ -1,0 +1,303 @@
+﻿@model DemoTest.Models.AuthorDetailsModel
+@{
+    ViewBag.Title = "AddBookDetails";
+}
+
+<h2>AddBookDetails</h2>
+<script src="~/Scripts/jquery-3.4.1.js"></script>
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+
+@using (Html.BeginForm())
+{
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <form>
+                    <div class="row">
+                        <div class="form-group">
+                            <div class="table-bordered">
+                                <div class="chklistbox" id="divAuthor" style="margin-left: 15px;">
+                                    <input type="checkbox" class="selectall" onclick="Checkall()" /><span>  Select All</span>
+                                    @foreach (var item in ViewBag.Author)
+                                    {
+                                        <div class="checkboxdiv">
+                                            <input type="checkbox" value="@item.AuthorID" class="case" />
+                                            @item.AuthorName
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        @*<div class="form-group  col-md-3">
+            <label>Author:<span style="color:red;">*</span> </label>
+            @Html.DropDownListFor(model => model.AuthorID, new SelectList(ViewBag.Author, "AuthorID", "AuthorName"), "--Select--", htmlAttributes: new { @class = "form-control",@id= "ddlAuthorID" })
+
+        </div>*@
+                        <div class="form-group col-md-3">
+                            <label>Book Title: <span style="color:red;">*</span></label>
+                            <input type="text" class="form-control" id="txtBookTitle" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12 col--lg-12">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" id="tblBook">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th>Book ID</th>
+                                                <th>Book Title</th>
+                                                <th>Author Name</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="form-group SearchMember/SearchMember text-center">
+                            <input type="button" class="btn btn-primary" id="btnSubmit" value="Submit" onclick="Add_BookDetails();" />
+                            <input type="button" class="btn btn-primary" id="btnCancelCityAdd" value="Clear" onclick="Clear();" />
+
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            debugger;
+            BindBookList();
+        });
+    </script>
+    <script>
+        function BindBookList() {
+            $.ajax({
+                type: "GET",
+                url: "/BookDetails/BindBookList",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                async: false,
+                success: function (data) {
+
+                    $("#tblBook").find("tr:gt(0)").remove();
+                    var tblAuthor = $("#tblBook");
+                    if (data.length > 0) {
+                        $("#tblBook").show();
+                        PopulateTable(data, 1);
+                        tableData = data.slice(0);
+                    }
+                    else {
+                        $("#CommonMsg").modal('show');
+                        $("#lblCommonMsg").html('No Data Found');
+                        $("#lblCommonMsg").css('color', '#008000');
+                        $("#tblAuthor").hide();
+                    }
+                },
+                error: {}
+            });
+        }
+        function Clear() {
+            $('#ddlAuthorID').val('');
+            $('#txtBookTitle').val('');
+            $("#divAuthor .case").each(function () {
+                $('#divAuthor input[type=checkbox]').prop('checked', false);
+            });
+        }
+        function Add_BookDetails() {
+            debugger;
+            var ObjBook = {};
+            //ObjBook.AuthorID = $('#ddlAuthorID').val();
+            var ID = '';
+            $('#divAuthor').find('input:checked').each(function () {
+                ID += $(this).val() + ',';
+            });
+            ObjBook.AuthorIDs = ID;
+            ObjBook.FirstName = $('#txtBookTitle').val();
+            if ($('#txtBookTitle').val() != "" || $('#AuthorID').val() != "") {
+                $.ajax({
+                    url: "/BookDetails/AddBook",
+                    data: "{ObjBook:" + JSON.stringify(ObjBook) + "}",
+                    dataType: "json",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    async: false,
+                    success: function (data) {
+                        debugger;
+                        if (data = 200) {
+                            BindBookList();
+                            alert('Record Added Successfully');
+                            Clear();
+                            
+                        }
+                        else {
+                            $("#CommonMsg").modal('show');
+                            $("#lblCommonMsg").html(data.Data.ErrorMessage);
+                            $("#lblCommonMsg").css('color', '#008000');
+                            Clear();
+                            $("#divAuthor .case").each(function () {
+                                $('#divAuthor input[type=checkbox]').prop('checked', false);
+                            });
+                        }
+
+
+                    },
+                    error: function (response) {
+                        alert(response.responseText);
+                    },
+                    failure: function (response) {
+                        alert(response.responseText);
+                    }
+                });
+
+            }
+            else {
+                alert('All Fields are mandatory..!');
+            }
+
+        }
+        function PopulateTable(arrData, pageNum) {
+
+            var rowsPerPage = 10;
+            var pages;
+            var i;
+            var pager = '';
+            var startIndex;
+            var endIndex;
+            var row;
+
+            $('#tblBook tr:gt(0)').remove();
+            if (arrData != null) {
+                // Populate table with data in the current page.
+                startIndex = (pageNum - 1) * rowsPerPage;
+                endIndex = pageNum * rowsPerPage > arrData.length ? arrData.length - 1 : pageNum * rowsPerPage - 1;
+                row += "<tr>";
+                row += "<th>Book ID</th>"
+                row += "<th>Book Title</th>"
+                row += "<th>Author Name</th>"
+               
+                row += "<th>Action</th>"
+                row += "</tr>";
+                for (i = startIndex; i <= endIndex; i++) {
+                    row = '<tr><td>' + arrData[i].BookID + '</td>'
+                        + '<td>' + arrData[i].FirstName + '</td>'
+                        + '<td>' + arrData[i].AuthorName + '</td>'                       
+                        + '<td>' + '<img src="/Images/edit.png" width="15px" id="btneditBook" data-toggle="tooltip" title="Edit" onclick="EditBookDetails(' + arrData[i].BookID + ');" BookID=' + arrData[i].BookID + '   /><img src="/Images/delete.png" width="15px" data-toggle="tooltip" title="Delete" id="btndeleteBook" onclick="DeleteBookDetails(' + arrData[i].BookID + ');" />' + '</td></tr>';
+                    $('#tblBook').append(row);
+                }
+
+                // Show pager row if there is more than one page
+                pages = Math.floor(arrData.length / rowsPerPage);
+                if (pages < arrData.length / rowsPerPage) {
+                    pages += 1;
+                }
+                if (pages > 1) {
+                    for (i = 0; i < pages; i++) {
+                        if (i == pageNum - 1) {
+                            pager += '<span>' + (i + 1) + '</span>';
+                        }
+                        else {
+                            pager += '<span><a href="#" style="color:#ffffff;">' + (i + 1) + '</a></span>'
+                        }
+                    }
+                    pager = '<tr><td colspan="125" class="pagerclass">' +
+                        pager + '</td></tr>';
+                    $('#tblBook').append(pager);
+
+                    // Pager link event handler
+                    $('#tblBook tr td.pagerclass a').click(function (e) {
+                        e.preventDefault();
+
+                        var pNum = parseInt($(this).text());
+                        PopulateTable(tableData, pNum);
+                    });
+                }
+            }
+        }
+
+        function EditBookDetails(ID) {
+
+            debugger;
+            $.ajax({
+                url: "/BookDetails/EditBook",
+                data: "{ID:" + ID + "}",
+                dataType: "json",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                async: false,
+                success: function (data) {
+                    debugger;
+                    // $('#ddlAuthorID').val(data.AuthorID);
+                    var AuthorIDS = data.AuthorIDs.split(',');
+                    var j;
+                    for (j = 0; j < (AuthorIDS.length - 1); j++) {
+                        $("#divAuthor").find('input:checkbox[value=' + AuthorIDS[j] + ']').prop('checked', true);
+                    }
+                    $('#txtBookTitle').val(data.FirstName);                    
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                }
+            });
+
+        }
+        function DeleteBookDetails(ID) {
+            debugger;
+            $.ajax({
+                url: "/BookDetails/DeleteBook",
+                data: "{ID:" + ID + "}",
+                dataType: "json",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                async: false,
+                success: function (data) {
+                    debugger;
+                    if (data = 200) {
+                        alert('Record Deleted Successfully');
+                       BindBookList();
+                        Clear();
+                    }
+                    else {
+                        $("#CommonMsg").modal('show');
+                        $("#lblCommonMsg").html(data.Data.ErrorMessage);
+                        $("#lblCommonMsg").css('color', '#008000');
+                        Clear();
+                    }
+
+
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        }
+        function Checkall() {
+            debugger;
+            if ($("#divAuthor .selectall").is(':checked')) {
+                $("#divAuthor .case").each(function () {
+                    $('#divAuthor input[type=checkbox]').prop('checked', true);
+                });
+            }
+            else {
+                $("#divAuthor .case").each(function () {
+                    $('#divAuthor input[type=checkbox]').prop('checked', false);
+                });
+            }
+        }
+    </script>
+}
