@@ -20,7 +20,7 @@ namespace DemoTest.Controllers
             return View();
         }   
         
-         [HttpPost]
+         [HttpPost]    
         public ActionResult AddInventoryDetails(InventoryDetailsModel objDetails)
         {
             if (Session["InventoryID"] != null)
