@@ -18,7 +18,7 @@ namespace DemoTest.Controllers
         public ActionResult AddInventory()
         {
             return View();
-        }
+        }   
         
          [HttpPost]
         public ActionResult AddInventoryDetails(InventoryDetailsModel objDetails)
